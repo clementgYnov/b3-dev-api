@@ -1,4 +1,6 @@
 // relation  One-to-Many (1:N).
+//  Exemple : Un auteur a plusieurs recettes
+
 
 // models/User.js
 const userSchema = new mongoose.Schema({
