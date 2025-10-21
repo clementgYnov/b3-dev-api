@@ -1,6 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
+
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
+
 const Product = require('./models/Product');
 const User = require('./models/User');
 const {
@@ -11,6 +15,7 @@ const {
     requirePermission,
     optionalAuthenticate
 } = require('./middleware/auth');
+const swaggerJSDoc = require('swagger-jsdoc');
 
 
 
@@ -24,6 +29,27 @@ mongoose.connect(mongoUrl, {})
         console.error("MongoDB connection error:", err);
         process.exit(1);
     });
+
+const swaggerOptions = {
+    swaggerDefinition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Product and User Management API',
+            version: '1.0.0',
+            description: 'API for managing products and users with authentication and authorization'
+        },
+        servers: [
+            {
+                url: 'http://localhost:3000',
+                description: 'Development server'
+            }
+        ]
+    },
+    apis: ['./index.js']
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use(express.json());
 
@@ -232,4 +258,5 @@ app.post("/posts/:id/like", (req, res) => {
 
 app.listen(3000, () => {
   console.log(`Server is running at http://localhost:3000`);
+  console.log(`API documentation available at http://localhost:3000/api-docs`);
 });
