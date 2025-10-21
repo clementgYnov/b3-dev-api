@@ -1,6 +1,7 @@
 const { error } = require('console');
 const fs = require('fs');
 const path = require('path');
+const morgan = require('morgan');
 
 const logDirectory = path.join(__dirname, '../logs');
 if (!fs.existsSync(logDirectory)) {
