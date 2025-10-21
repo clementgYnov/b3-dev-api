@@ -1,4 +1,3 @@
-const { error } = require('console');
 const fs = require('fs');
 const path = require('path');
 const morgan = require('morgan');
@@ -12,6 +11,7 @@ const errorLogPath = path.join(logDirectory, 'error.log');
 const accessLogPath = path.join(logDirectory, 'access.log');
 
 const accesslogStream = fs.createWriteStream(accessLogPath, { flags: 'a' });
+
 const morganFormat = ':date[iso] :method :url :status :response-time ms - :res[content-length]';
 
 const requestLogger = morgan(morganFormat, { stream: accesslogStream });

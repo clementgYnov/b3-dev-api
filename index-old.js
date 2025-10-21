@@ -1,12 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { AppError, asyncHandler } = require('./utils/error');
-const { logger, requestLogger, consoleLogger } = require('./utils/logger');
-const { errorHandler, notFoundHandler } = require('./middleware/errorMiddlleware'); 
-const postsRouter = require('./routes/products');
-
-require('dotenv').config();
+const morgan = require('morgan');
+const rfs = require('rotating-file-stream');
+const path = require('path');
 const app = express();
+
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const Product = require('./models/Product');
 const User = require('./models/User');
@@ -18,15 +18,11 @@ const {
     requirePermission,
     optionalAuthenticate
 } = require('./middleware/auth');
+const swaggerJSDoc = require('swagger-jsdoc');
 
 
-app.use(express.json());
 
-app.use(consoleLogger);
-app.use(requestLogger);
-
-
-const mongoUrl = process.env.MONGODB_URL;
+const mongoUrl = "mongodb+srv://clementgrosieux93_db_user:khTKnXuyRQ2yV8jD@cluster0.qd0lxci.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose.connect(mongoUrl, {})
     .then(() => {
@@ -37,6 +33,75 @@ mongoose.connect(mongoUrl, {})
         process.exit(1);
     });
 
+// USE SWAGGER WITH OPTIONS
+
+const swaggerOptions = {
+    swaggerDefinition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Product and User Management API',
+            version: '1.0.0',
+            description: 'API for managing products and users with authentication and authorization'
+        },
+        servers: [
+            {
+                url: 'http://localhost:3000',
+                description: 'Development server'
+            }
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT'
+                }
+            }
+        }
+    },
+    apis: ['./index.js']
+};
+
+const swaggerSpecs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
+const accessLogStream = rfs.createStream('access.log', {
+    interval: '1d', // rotate every 20 seconds
+    size: '1MB', // rotate every 1MB
+    path: path.join(__dirname, 'logs'),
+});
+
+
+app.use(morgan('combined', { stream: accessLogStream }));
+
+morgan.token('action', (req) => (req.action ? req.action : 'Guest'));
+morgan.token('user-email', (req) => (req.user ? req.user.email : 'Guest'));
+app.use(morgan(':action :user-email :response-time ms'));
+
+const userActionsStream = rfs.createStream('access.log', {
+    interval: '1d', // rotate every 20 seconds
+    size: '1MB', // rotate every 1MB
+    path: path.join(__dirname, 'logs/user-actions'),
+});
+
+const userActionLogger = morgan((tokens, req, res) => {
+  return JSON.stringify({
+    timestamp: new Date().toISOString(),
+    userId: req.user?.id || 'anonymous',
+    action: req.actionType || 'unknown',
+    method: tokens.method(req, res),
+    url: tokens.url(req, res),
+    status: parseInt(tokens.status(req, res), 10),
+    ip: tokens['remote-addr'](req, res),
+    userAgent: tokens['user-agent'](req, res),
+    responseTime: tokens['response-time'](req, res)
+  });
+}, { stream: userActionsStream });
+
+app.use(userActionLogger);
+
+app.use(express.json());
+
 
 let posts = [
     {id: 1, title: "Mon premier post", like: 0},
@@ -44,8 +109,9 @@ let posts = [
     {id: 3, title: "Mon troisième post", like: 0},
 ];
 
-
-app.use("/products", postsRouter);
+app.use((req, res, next) => {
+    next();
+})
 
 
 app.get('/roles',  (req, res) => {
@@ -103,23 +169,29 @@ app.get('/roles',  (req, res) => {
  *       500:
  *         description: Server error
  */
-app.post('/register', asyncHandler(async (req, res) => {
-    const { username, email, password } = req.body;
+app.post('/register', async (req, res) => {
+    try{
+        const { username, email, password } = req.body;
 
-    if(!username || !email || !password) {
-        throw new AppError("All fields are required", 400);
+        if(!username || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const user = new User({ username, email, password });
+        await user.save();
+        const jwtToken = generateToken(user._id);
+
+        res.status(201).json({
+            message: "User registered successfully",
+            user: user,
+            token: jwtToken
+        });
+
+    } catch (error) {  
+        console.error("Error registering user:", error);
+        res.status(500).json({ message: "Server error" });
     }
-
-    const user = new User({ username, email, password });
-    await user.save();
-    const jwtToken = generateToken(user._id);
-
-    res.status(201).json({
-        message: "User registered successfully",
-        user: user,
-        token: jwtToken
-    });
-}));
+});
 
 /**
  * @swagger
@@ -165,30 +237,35 @@ app.post('/register', asyncHandler(async (req, res) => {
  *       500:
  *         description: Server error
  */
-app.post('/login', asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
 
-    if(!email || !password) {
-        throw new AppError("Email and password are required", 400);
-    }
+        if(!email || !password) {
+            return res.status(400).json({ message: "Email and password are required" });
+        }
 
-    const user = await User.findOne({ email: email });
-    if(!user) {
-        throw new AppError("Invalid email or password", 400);
-    }
-    const passwordMatch = await user.comparePassword(password);
-    if(!passwordMatch) {
-        throw new AppError("Invalid email or password", 400);
-    }
+        const user = await User.findOne({ email: email });
+        if(!user) {
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
+        const passwordMatch = await user.comparePassword(password);
+        if(!passwordMatch) {
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
 
-    const jwtToken = generateToken(user._id);
-    console.log(user.ROLES);
-    return res.status(200).json({
-        message: "Login successful",
-        user: user,
-        token: jwtToken
-    });
-}));
+        const jwtToken = generateToken(user._id);
+        console.log(user.ROLES);
+        return res.status(200).json({
+            message: "Login successful",
+            user: user,
+            token: jwtToken
+        });
+    } catch (error) {
+        console.error("Error logging in user:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 
 /**
@@ -220,10 +297,15 @@ app.post('/login', asyncHandler(async (req, res) => {
  *       500:
  *         description: Server error
  */
-// app.get('/products', optionalAuthenticate, asyncHandler(async (req, res) => {
-//     const products = await Product.find();
-//     res.json(products);
-// }));
+app.get('/products', optionalAuthenticate, async (req, res) => {
+    try {
+        const products = await Product.find();
+        res.json(products);
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 /**
  * @swagger
@@ -278,24 +360,29 @@ app.post('/login', asyncHandler(async (req, res) => {
  *       500:
  *         description: Server error
  */
-app.get('/productspage', asyncHandler(async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+app.get('/productspage', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
 
-    const skip = (page - 1) * limit;
-    const products = await Product.find().skip(skip).limit(limit);
-    const total = await Product.countDocuments();
+        const skip = (page - 1) * limit;
+        const products = await Product.find().skip(skip).limit(limit);
+        const total = await Product.countDocuments();
 
-    res.json({
-        data: products,
-        pagination: {
-            page: page,
-            limit: limit,
-            total: total,
-            pages: Math.ceil(total / limit)
-        }
-    });
-}));
+        res.json({
+            data: products,
+            pagination: {
+                page: page,
+                limit: limit,
+                total: total,
+                pages: Math.ceil(total / limit)
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 /**
  * @swagger
@@ -350,22 +437,27 @@ app.get('/productspage', asyncHandler(async (req, res) => {
  *       500:
  *         description: Server error
  */
-app.post("/products", authenticateUser, requirePermission('create_products'), asyncHandler(async (req, res) => {
-    console.log("Creating product with data:", req.body);
-    const { name, price } = req.body;
-    if(!name || !price) {
-        throw new AppError("Name and price are required", 400);
+app.post("/products", authenticateUser, requirePermission('create_products'), async (req, res) => {
+    try {
+        console.log("Creating product with data:", req.body);
+        const { name, price } = req.body;
+        if(!name || !price) {
+            return res.status(400).json({ message: "Name and price are required" });
+        }
+
+        // findByIdAndUpdate
+
+        const newProduct = new Product({ name, price });
+        const savedProduct = await newProduct.save();
+        res.status(201).json({
+            message: "Product created",
+            product: savedProduct
+        });
+    } catch (error) {
+        console.error("Error creating product:", error);
+        res.status(500).json({ message: "Server error" });
     }
-
-    // findByIdAndUpdate
-
-    const newProduct = new Product({ name, price });
-    const savedProduct = await newProduct.save();
-    res.status(201).json({
-        message: "Product created",
-        product: savedProduct
-    });
-}));
+})
 
 /**
  * @swagger
@@ -419,30 +511,36 @@ app.post("/products", authenticateUser, requirePermission('create_products'), as
  *       500:
  *         description: Server error
  */
-app.patch("/products/:id", authenticateUser, requireAnyRole([User.ROLES.VENDOR, User.ROLES.ADMIN]), asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { name, price } = req.body;
+app.patch("/products/:id", authenticateUser, requireAnyRole([User.ROLES.VENDOR, User.ROLES.ADMIN]), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, price } = req.body;
 
-    if(!name && !price) {
-        throw new AppError("Name or price are required", 400);
+        if(!name && !price) {
+            return res.status(400).json({ message: "Name or price are required" });
+        }
+
+        // Construire l'objet de mise à jour avec seulement les champs fournis
+        const updateData = {};
+        if (name) updateData.name = name;
+        if (price) updateData.price = price;
+
+        const updatedProduct = await Product.findByIdAndUpdate(
+            id, updateData, {new: true}
+        );
+        if(!updatedProduct) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.status(200).json({
+            message: "Product updated",
+            product: updatedProduct
+        });
     }
-
-    // Construire l'objet de mise à jour avec seulement les champs fournis
-    const updateData = {};
-    if (name) updateData.name = name;
-    if (price) updateData.price = price;
-
-    const updatedProduct = await Product.findByIdAndUpdate(
-        id, updateData, {new: true}
-    );
-    if(!updatedProduct) {
-        throw new AppError("Product not found", 404);
+    catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).json({ message: "Server error" });
     }
-    res.status(200).json({
-        message: "Product updated",
-        product: updatedProduct
-    });
-}));
+});
 
 /**
  * @swagger
@@ -481,19 +579,24 @@ app.patch("/products/:id", authenticateUser, requireAnyRole([User.ROLES.VENDOR, 
  *       500:
  *         description: Server error
  */
-app.delete("/products/:id", authenticateUser, requiredRole(User.ROLES.ADMIN), asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const deletedProduct = await Product.findByIdAndDelete(id);
-    
-    if(!deletedProduct) {
-        throw new AppError("Product not found", 404);
+app.delete("/products/:id", authenticateUser, requiredRole(User.ROLES.ADMIN), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedProduct = await Product.findByIdAndDelete(id);
+        
+        if(!deletedProduct) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        
+        res.status(200).json({
+            message: "Product deleted successfully",
+            product: deletedProduct
+        });
+    } catch (error) {
+        console.error("Error deleting product:", error);
+        res.status(500).json({ message: "Server error" });
     }
-    
-    res.status(200).json({
-        message: "Product deleted successfully",
-        product: deletedProduct
-    });
-}));
+});
 
 /**
  * @swagger
@@ -529,10 +632,15 @@ app.delete("/products/:id", authenticateUser, requiredRole(User.ROLES.ADMIN), as
  *       500:
  *         description: Server error
  */
-app.get("/users", authenticateUser, requirePermission('manage_users'), asyncHandler(async (req, res) => {
-    const users = await User.find();
-    res.json(users);
-}));
+app.get("/users", authenticateUser, requirePermission('manage_users'), async (req, res) => {
+    try {
+        const users = await User.find();
+        res.json(users);
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 /**
  * @swagger
@@ -574,7 +682,7 @@ app.post("/posts/:id/like", (req, res) => {
     const id = parseInt(req.params.id);
     const post = posts.find(p => p.id === id);
     if (!post) {
-        throw new AppError("Post not found", 404);
+        return res.status(404).json({ message: "Post not found" });
     }
     post.like += 1;
     res.status(200).json({
@@ -583,44 +691,8 @@ app.post("/posts/:id/like", (req, res) => {
     });
 });
 
-// Test d'erreur simple (synchrone)
-app.get('/test/error', (req, res, next) => {
-  // Déclencher une erreur
-  throw new AppError('Ceci est une erreur de test', 500);
-});
-
-// Test d'erreur asynchrone
-app.get('/test/async-error', asyncHandler(async (req, res, next) => {
-  // Simuler une opération async qui échoue
-  await new Promise((resolve, reject) => {
-    setTimeout(() => {
-      reject(new AppError('Erreur asynchrone simulée', 500));
-    }, 100);
-  });
-}));
-
-// Test d'erreur JavaScript non gérée
-app.get('/test/unhandled', (req, res) => {
-  // Ceci va déclencher une erreur non gérée
-  const obj = null;
-  obj.property; // TypeError: Cannot read property of null
-});
-
-// Route de santé
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString()
-  });
-});
-
-
-app.use(notFoundHandler);
-app.use(errorHandler);
 
 app.listen(3000, () => {
-  logger.info(`Server is running at http://localhost:3000`);
-  logger.info('Log dipo : ./logs/');
-  logger.error('This is an error log example');
+  console.log(`Server is running at http://localhost:3000`);
+  console.log(`API documentation available at http://localhost:3000/api-docs`);
 });
