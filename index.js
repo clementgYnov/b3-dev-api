@@ -43,7 +43,16 @@ const swaggerOptions = {
                 url: 'http://localhost:3000',
                 description: 'Development server'
             }
-        ]
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT'
+                }
+            }
+        }
     },
     apis: ['./index.js']
 };
@@ -64,6 +73,28 @@ app.use((req, res, next) => {
     next();
 })
 
+/**
+ * @swagger
+ * /roles:
+ *   get:
+ *     summary: Get all available roles and role hierarchy
+ *     description: Returns the list of all available roles in the system and their hierarchy
+ *     tags: [Roles]
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved roles
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 roles:
+ *                   type: object
+ *                   description: Object containing all available roles
+ *                 roleHierarchy:
+ *                   type: object
+ *                   description: Object describing the role hierarchy
+ */
 app.get('/roles',  (req, res) => {
     res.json({
         roles: User.ROLES,
@@ -71,6 +102,54 @@ app.get('/roles',  (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: Register a new user
+ *     description: Create a new user account with username, email and password
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: johndoe
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: john@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: SecurePass123!
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Server error
+ */
 app.post('/register', async (req, res) => {
     try{
         const { username, email, password } = req.body;
@@ -95,6 +174,50 @@ app.post('/register', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Login to the system
+ *     description: Authenticate a user with email and password
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: john@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: SecurePass123!
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Invalid email or password
+ *       500:
+ *         description: Server error
+ */
 app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -126,6 +249,35 @@ app.post('/login', async (req, res) => {
 });
 
 
+/**
+ * @swagger
+ * /products:
+ *   get:
+ *     summary: Get all products
+ *     description: Retrieve a list of all products. Authentication is optional.
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *       - {}
+ *     responses:
+ *       200:
+ *         description: List of products retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   price:
+ *                     type: number
+ *       500:
+ *         description: Server error
+ */
 app.get('/products', optionalAuthenticate, async (req, res) => {
     try {
         const products = await Product.find();
@@ -136,6 +288,59 @@ app.get('/products', optionalAuthenticate, async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /productspage:
+ *   get:
+ *     summary: Get paginated products
+ *     description: Retrieve a paginated list of products
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       price:
+ *                         type: number
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
+ *       500:
+ *         description: Server error
+ */
 app.get('/productspage', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -160,6 +365,59 @@ app.get('/productspage', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /products:
+ *   post:
+ *     summary: Create a new product
+ *     description: Create a new product. Requires authentication and create_products permission.
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - price
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Laptop
+ *               price:
+ *                 type: number
+ *                 example: 999.99
+ *     responses:
+ *       201:
+ *         description: Product created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 product:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     price:
+ *                       type: number
+ *       400:
+ *         description: Missing required fields
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - insufficient permissions
+ *       500:
+ *         description: Server error
+ */
 app.post("/products", authenticateUser, requirePermission('create_products'), async (req, res) => {
     try {
         console.log("Creating product with data:", req.body);
@@ -182,6 +440,58 @@ app.post("/products", authenticateUser, requirePermission('create_products'), as
     }
 })
 
+/**
+ * @swagger
+ * /products/{id}:
+ *   patch:
+ *     summary: Update a product
+ *     description: Update product information. Requires authentication and VENDOR or ADMIN role.
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Updated Laptop
+ *               price:
+ *                 type: number
+ *                 example: 899.99
+ *     responses:
+ *       200:
+ *         description: Product updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 product:
+ *                   type: object
+ *       400:
+ *         description: Name or price required
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - insufficient permissions
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
 app.patch("/products/:id", authenticateUser, requireAnyRole([User.ROLES.VENDOR, User.ROLES.ADMIN]), async (req, res) => {
     try {
         const { id } = req.params;
@@ -213,6 +523,43 @@ app.patch("/products/:id", authenticateUser, requireAnyRole([User.ROLES.VENDOR, 
     }
 });
 
+/**
+ * @swagger
+ * /products/{id}:
+ *   delete:
+ *     summary: Delete a product
+ *     description: Delete a product by ID. Requires authentication and ADMIN role.
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 product:
+ *                   type: object
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - ADMIN role required
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Server error
+ */
 app.delete("/products/:id", authenticateUser, requiredRole(User.ROLES.ADMIN), async (req, res) => {
     try {
         const { id } = req.params;
@@ -232,6 +579,40 @@ app.delete("/products/:id", authenticateUser, requiredRole(User.ROLES.ADMIN), as
     }
 });
 
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     description: Retrieve a list of all users. Requires authentication and manage_users permission.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   username:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   role:
+ *                     type: string
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - insufficient permissions
+ *       500:
+ *         description: Server error
+ */
 app.get("/users", authenticateUser, requirePermission('manage_users'), async (req, res) => {
     try {
         const users = await User.find();
@@ -242,6 +623,42 @@ app.get("/users", authenticateUser, requirePermission('manage_users'), async (re
     }
 });
 
+/**
+ * @swagger
+ * /posts/{id}/like:
+ *   post:
+ *     summary: Like a post
+ *     description: Increment the like count of a specific post
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Post ID
+ *     responses:
+ *       200:
+ *         description: Post liked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 post:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     title:
+ *                       type: string
+ *                     like:
+ *                       type: integer
+ *       404:
+ *         description: Post not found
+ */
 app.post("/posts/:id/like", (req, res) => {
     const id = parseInt(req.params.id);
     const post = posts.find(p => p.id === id);
