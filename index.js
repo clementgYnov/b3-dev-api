@@ -7,7 +7,7 @@ const {
     generateToken,
     authenticateUser,
     requiredRole,
-    requestAnyRole,
+    requireAnyRole,
     requirePermission,
     optionalAuthenticate
 } = require('./middleware/auth');
@@ -37,6 +37,13 @@ app.use((req, res, next) => {
     console.log("Middleware");
     next();
 })
+
+app.get('/roles',  (req, res) => {
+    res.json({
+        roles: User.ROLES,
+        roleHierarchy: User.ROLE_HIERARCHY
+    });
+});
 
 app.post('/register', async (req, res) => {
     try{
@@ -80,7 +87,8 @@ app.post('/login', async (req, res) => {
         }
 
         const jwtToken = generateToken(user._id);
-        res.status(200).json({
+        console.log(user.ROLES);
+        return res.status(200).json({
             message: "Login successful",
             user: user,
             token: jwtToken
@@ -91,8 +99,8 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// j'intercepte les requêtes GET sur /products
-app.get('/products', async (req, res) => {
+
+app.get('/products', optionalAuthenticate, async (req, res) => {
     try {
         const products = await Product.find();
         res.json(products);
@@ -126,8 +134,7 @@ app.get('/productspage', async (req, res) => {
     }
 });
 
-// j'intercepte les requêtes POST sur /posts
-app.post("/products", authenticateUser, requiredRole(ADMIN), async (req, res) => {
+app.post("/products", authenticateUser, requirePermission('create_products'), async (req, res) => {
     try {
         console.log("Creating product with data:", req.body);
         const { name, price } = req.body;
@@ -149,7 +156,7 @@ app.post("/products", authenticateUser, requiredRole(ADMIN), async (req, res) =>
     }
 })
 
-app.patch("/products/:id", async (req, res) => {
+app.patch("/products/:id", authenticateUser, requireAnyRole([User.ROLES.VENDOR, User.ROLES.ADMIN]), async (req, res) => {
     try {
         const { id } = req.params;
         const { name, price } = req.body;
@@ -180,6 +187,34 @@ app.patch("/products/:id", async (req, res) => {
     }
 });
 
+app.delete("/products/:id", authenticateUser, requiredRole(User.ROLES.ADMIN), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedProduct = await Product.findByIdAndDelete(id);
+        
+        if(!deletedProduct) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        
+        res.status(200).json({
+            message: "Product deleted successfully",
+            product: deletedProduct
+        });
+    } catch (error) {
+        console.error("Error deleting product:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.get("/users", authenticateUser, requirePermission('manage_users'), async (req, res) => {
+    try {
+        const users = await User.find();
+        res.json(users);
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 app.post("/posts/:id/like", (req, res) => {
     const id = parseInt(req.params.id);
