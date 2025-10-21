@@ -1,5 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const morgan = require('morgan');
+const rfs = require('rotating-file-stream');
+const path = require('path');
 const app = express();
 
 const swaggerUi = require('swagger-ui-express');
@@ -30,6 +33,8 @@ mongoose.connect(mongoUrl, {})
         process.exit(1);
     });
 
+// USE SWAGGER WITH OPTIONS
+
 const swaggerOptions = {
     swaggerDefinition: {
         openapi: '3.0.0',
@@ -57,10 +62,46 @@ const swaggerOptions = {
     apis: ['./index.js']
 };
 
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+const swaggerSpecs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
+const accessLogStream = rfs.createStream('access.log', {
+    interval: '1d', // rotate every 20 seconds
+    size: '1MB', // rotate every 1MB
+    path: path.join(__dirname, 'logs'),
+});
+
+
+app.use(morgan('combined', { stream: accessLogStream }));
+
+morgan.token('action', (req) => (req.action ? req.action : 'Guest'));
+morgan.token('user-email', (req) => (req.user ? req.user.email : 'Guest'));
+app.use(morgan(':action :user-email :response-time ms'));
+
+const userActionsStream = rfs.createStream('access.log', {
+    interval: '1d', // rotate every 20 seconds
+    size: '1MB', // rotate every 1MB
+    path: path.join(__dirname, 'logs/user-actions'),
+});
+
+const userActionLogger = morgan((tokens, req, res) => {
+  return JSON.stringify({
+    timestamp: new Date().toISOString(),
+    userId: req.user?.id || 'anonymous',
+    action: req.actionType || 'unknown',
+    method: tokens.method(req, res),
+    url: tokens.url(req, res),
+    status: parseInt(tokens.status(req, res), 10),
+    ip: tokens['remote-addr'](req, res),
+    userAgent: tokens['user-agent'](req, res),
+    responseTime: tokens['response-time'](req, res)
+  });
+}, { stream: userActionsStream });
+
+app.use(userActionLogger);
 
 app.use(express.json());
+
 
 let posts = [
     {id: 1, title: "Mon premier post", like: 0},
@@ -69,32 +110,10 @@ let posts = [
 ];
 
 app.use((req, res, next) => {
-    console.log("Middleware");
     next();
 })
 
-/**
- * @swagger
- * /roles:
- *   get:
- *     summary: Get all available roles and role hierarchy
- *     description: Returns the list of all available roles in the system and their hierarchy
- *     tags: [Roles]
- *     responses:
- *       200:
- *         description: Successfully retrieved roles
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 roles:
- *                   type: object
- *                   description: Object containing all available roles
- *                 roleHierarchy:
- *                   type: object
- *                   description: Object describing the role hierarchy
- */
+
 app.get('/roles',  (req, res) => {
     res.json({
         roles: User.ROLES,
