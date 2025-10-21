@@ -1,12 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const morgan = require('morgan');
-const rfs = require('rotating-file-stream');
-const path = require('path');
-const app = express();
+const { AppError, asyncHandler } = require('./utils/error');
+const { logger, requestLogger, consoleLogger } = require('./utils/logger');
+const { errorHandler, notFoundHandler } = require('./middleware/errorMiddlleware'); 
 
-const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
+const app = express();
 
 const Product = require('./models/Product');
 const User = require('./models/User');
@@ -18,8 +16,12 @@ const {
     requirePermission,
     optionalAuthenticate
 } = require('./middleware/auth');
-const swaggerJSDoc = require('swagger-jsdoc');
 
+
+app.use(express.json());
+
+app.use(consoleLogger);
+app.use(requestLogger);
 
 
 const mongoUrl = "mongodb+srv://clementgrosieux93_db_user:khTKnXuyRQ2yV8jD@cluster0.qd0lxci.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
@@ -32,75 +34,6 @@ mongoose.connect(mongoUrl, {})
         console.error("MongoDB connection error:", err);
         process.exit(1);
     });
-
-// USE SWAGGER WITH OPTIONS
-
-const swaggerOptions = {
-    swaggerDefinition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'Product and User Management API',
-            version: '1.0.0',
-            description: 'API for managing products and users with authentication and authorization'
-        },
-        servers: [
-            {
-                url: 'http://localhost:3000',
-                description: 'Development server'
-            }
-        ],
-        components: {
-            securitySchemes: {
-                bearerAuth: {
-                    type: 'http',
-                    scheme: 'bearer',
-                    bearerFormat: 'JWT'
-                }
-            }
-        }
-    },
-    apis: ['./index.js']
-};
-
-const swaggerSpecs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-
-const accessLogStream = rfs.createStream('access.log', {
-    interval: '1d', // rotate every 20 seconds
-    size: '1MB', // rotate every 1MB
-    path: path.join(__dirname, 'logs'),
-});
-
-
-app.use(morgan('combined', { stream: accessLogStream }));
-
-morgan.token('action', (req) => (req.action ? req.action : 'Guest'));
-morgan.token('user-email', (req) => (req.user ? req.user.email : 'Guest'));
-app.use(morgan(':action :user-email :response-time ms'));
-
-const userActionsStream = rfs.createStream('access.log', {
-    interval: '1d', // rotate every 20 seconds
-    size: '1MB', // rotate every 1MB
-    path: path.join(__dirname, 'logs/user-actions'),
-});
-
-const userActionLogger = morgan((tokens, req, res) => {
-  return JSON.stringify({
-    timestamp: new Date().toISOString(),
-    userId: req.user?.id || 'anonymous',
-    action: req.actionType || 'unknown',
-    method: tokens.method(req, res),
-    url: tokens.url(req, res),
-    status: parseInt(tokens.status(req, res), 10),
-    ip: tokens['remote-addr'](req, res),
-    userAgent: tokens['user-agent'](req, res),
-    responseTime: tokens['response-time'](req, res)
-  });
-}, { stream: userActionsStream });
-
-app.use(userActionLogger);
-
-app.use(express.json());
 
 
 let posts = [
@@ -691,8 +624,44 @@ app.post("/posts/:id/like", (req, res) => {
     });
 });
 
+// Test d'erreur simple (synchrone)
+app.get('/test/error', (req, res, next) => {
+  // Déclencher une erreur
+  throw new AppError('Ceci est une erreur de test', 500);
+});
+
+// Test d'erreur asynchrone
+app.get('/test/async-error', asyncHandler(async (req, res, next) => {
+  // Simuler une opération async qui échoue
+  await new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(new AppError('Erreur asynchrone simulée', 500));
+    }, 100);
+  });
+}));
+
+// Test d'erreur JavaScript non gérée
+app.get('/test/unhandled', (req, res) => {
+  // Ceci va déclencher une erreur non gérée
+  const obj = null;
+  obj.property; // TypeError: Cannot read property of null
+});
+
+// Route de santé
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
+
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 app.listen(3000, () => {
-  console.log(`Server is running at http://localhost:3000`);
-  console.log(`API documentation available at http://localhost:3000/api-docs`);
+  logger.info(`Server is running at http://localhost:3000`);
+  logger.info('Log dipo : ./logs/');
+  logger.error('This is an error log example');
 });
