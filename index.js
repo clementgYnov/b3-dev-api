@@ -2,6 +2,17 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 const Product = require('./models/Product');
+const User = require('./models/User');
+const {
+    generateToken,
+    authenticateUser,
+    requiredRole,
+    requestAnyRole,
+    requirePermission,
+    optionalAuthenticate
+} = require('./middleware/auth');
+
+
 
 const mongoUrl = "mongodb+srv://clementgrosieux93_db_user:khTKnXuyRQ2yV8jD@cluster0.qd0lxci.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
@@ -27,6 +38,58 @@ app.use((req, res, next) => {
     next();
 })
 
+app.post('/register', async (req, res) => {
+    try{
+        const { username, email, password } = req.body;
+
+        if(!username || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const user = new User({ username, email, password });
+        await user.save();
+        const jwtToken = generateToken(user._id);
+
+        res.status(201).json({
+            message: "User registered successfully",
+            user: user,
+            token: jwtToken
+        });
+
+    } catch (error) {  
+        console.error("Error registering user:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if(!email || !password) {
+            return res.status(400).json({ message: "Email and password are required" });
+        }
+
+        const user = await User.findOne({ email: email });
+        if(!user) {
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
+        const passwordMatch = await user.comparePassword(password);
+        if(!passwordMatch) {
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
+
+        const jwtToken = generateToken(user._id);
+        res.status(200).json({
+            message: "Login successful",
+            user: user,
+            token: jwtToken
+        });
+    } catch (error) {
+        console.error("Error logging in user:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
 
 // j'intercepte les requêtes GET sur /products
 app.get('/products', async (req, res) => {
@@ -64,8 +127,9 @@ app.get('/productspage', async (req, res) => {
 });
 
 // j'intercepte les requêtes POST sur /posts
-app.post("/products", async (req, res) => {
+app.post("/products", authenticateUser, requiredRole(ADMIN), async (req, res) => {
     try {
+        console.log("Creating product with data:", req.body);
         const { name, price } = req.body;
         if(!name || !price) {
             return res.status(400).json({ message: "Name and price are required" });
