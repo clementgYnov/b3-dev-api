@@ -1,36 +1,31 @@
-const { logger } = require('../utils/logger');
-const { AppError } = require('../utils/errors');
+const {logger} = require('../utils/logger');
+const { AppError } = require('../utils/error');
 
-// Middleware principal de gestion des erreurs
 const errorHandler = (err, req, res, next) => {
-  // Logger l'erreur
-  logger.error(`${req.method} ${req.originalUrl}`, err);
-  
-  // Déterminer le status code
-  const statusCode = err.statusCode || 500;
-  
-  // Construire la réponse
-  const response = {
-    success: false,
-    message: err.message || 'Erreur interne du serveur',
-    timestamp: err.timestamp || new Date().toISOString()
-  };
-  
-  // En développement, ajouter la stack trace
-  if (process.env.NODE_ENV === 'development') {
-    response.stack = err.stack;
-  }
-  
-  res.status(statusCode).json(response);
-};
+    // Logger l'erreur
+    logger.error(`${req.method} ${req.originalUrl} - ${err.message}`, err);
 
-// Middleware pour les routes non trouvées
+    const statusCode = err.statusCode || 500;
+
+    const response = {
+        success: false,
+        message: err.message || 'Internal Server Error',
+        timestamp: new Date().toISOString()
+    };
+
+    if(process.env.NODE_ENV === 'development') {
+        response.stack = err.stack;
+    }
+
+    res.status(statusCode).json(response);
+}
+
 const notFoundHandler = (req, res, next) => {
-  const error = new AppError(`Route ${req.method} ${req.originalUrl} non trouvée`, 404);
-  next(error);
-};
+    const error = new AppError(`Cannot find ${req.originalUrl} on this server`, 404);
+    next(error);
+}
 
 module.exports = {
-  errorHandler,
-  notFoundHandler
+    errorHandler,
+    notFoundHandler
 };
