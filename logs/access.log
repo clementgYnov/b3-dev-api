@@ -1,0 +1,88 @@
+[2025-10-21T14:30:42.969Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:30:42.971Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:30:48.509Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:30:48.510Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:30:54.724Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:30:54.726Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:31:46.712Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:31:46.713Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:31:49.131Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:31:49.132Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:31:49.343Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:31:49.344Z] INFO: 🚀 Serveur prêt!
+POST /auth/register 500 1.934 ms - 2025-10-21T14:31:56.682Z
+[2025-10-21T14:32:31.386Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:32:31.387Z] INFO: 🚀 Serveur prêt!
+POST /auth/register 500 2.873 ms - 2025-10-21T14:32:34.168Z
+[2025-10-21T14:33:12.049Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:33:12.050Z] INFO: 🚀 Serveur prêt!
+POST /auth/register 500 3.183 ms - 2025-10-21T14:33:15.817Z
+[2025-10-21T14:33:41.485Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:33:41.486Z] INFO: 🚀 Serveur prêt!
+POST /auth/register 400 3.320 ms - 2025-10-21T14:33:44.028Z
+[2025-10-21T14:34:17.413Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:34:17.414Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:34:17.684Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:34:17.685Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:34:19.271Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:34:19.272Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:37:12.171Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:37:12.172Z] INFO: 🚀 Serveur prêt!
+POST /auth/register 400 5.330 ms - 2025-10-21T14:37:16.613Z
+[2025-10-21T14:38:32.702Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:38:32.703Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:39:31.846Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:39:31.847Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:42:07.410Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:42:07.411Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:42:07.652Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:42:07.654Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:42:07.758Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:42:07.759Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:42:13.292Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:42:13.293Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:42:13.395Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:42:13.396Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:42:13.713Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:42:13.714Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:42:15.812Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:42:15.813Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:42:22.130Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:42:22.131Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:47:09.525Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:47:09.526Z] INFO: 🚀 Serveur prêt!
+POST /auth/register 400 3.649 ms - 2025-10-21T14:47:21.602Z
+POST /auth/register 500 10012.054 ms - 2025-10-21T14:48:10.038Z
+[2025-10-21T14:48:46.242Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:48:46.243Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:48:50.569Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:48:50.570Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:50:28.576Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:50:28.577Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:56:55.591Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:56:55.592Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:57:08.222Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:57:08.223Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:57:12.876Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:57:12.877Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:57:38.063Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:57:38.064Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:59:32.153Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:59:32.154Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:59:33.525Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:59:33.526Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T14:59:34.824Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T14:59:34.825Z] INFO: 🚀 Serveur prêt!
+POST /auth/register 500 18.811 ms - 2025-10-21T14:59:40.741Z
+[2025-10-21T15:00:12.307Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T15:00:12.308Z] INFO: 🚀 Serveur prêt!
+[2025-10-21T15:00:16.113Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T15:00:16.114Z] INFO: 🚀 Serveur prêt!
+POST /auth/register 409 16.565 ms - 2025-10-21T15:00:21.206Z
+POST /auth/register 409 17.488 ms - 2025-10-21T15:00:22.829Z
+POST /auth/register 409 15.316 ms - 2025-10-21T15:00:23.771Z
+POST /auth/register 409 18.482 ms - 2025-10-21T15:00:24.142Z
+POST /auth/register 409 15.558 ms - 2025-10-21T15:00:24.406Z
+POST /auth/register 201 116.800 ms - 2025-10-21T15:00:28.264Z
+[2025-10-21T15:00:39.584Z] INFO: Serveur démarré sur http://localhost:3000
+[2025-10-21T15:00:39.585Z] INFO: 🚀 Serveur prêt!

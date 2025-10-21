@@ -1,0 +1,98 @@
+[2025-10-21T14:31:56.680Z] ERROR: POST /auth/register - Registration failed
+Error: Registration failed
+    at registerController (/Users/clementg/Documents/cours-apib3-tp-gameShare/controllers/authController.js:11:11)
+    at Layer.handleRequest (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/layer.js:152:17)
+    at /Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:295:15
+    at processParams (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:582:12)
+    at next (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:186:3)
+[2025-10-21T14:32:34.166Z] ERROR: POST /auth/register - Registration failed
+Error: Registration failed
+    at registerController (/Users/clementg/Documents/cours-apib3-tp-gameShare/controllers/authController.js:12:11)
+    at Layer.handleRequest (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/layer.js:152:17)
+    at /Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:295:15
+    at processParams (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:582:12)
+    at next (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:186:3)
+[2025-10-21T14:33:15.815Z] ERROR: POST /auth/register - Registration failed
+Error: Registration failed
+    at registerController (/Users/clementg/Documents/cours-apib3-tp-gameShare/controllers/authController.js:13:11)
+    at Layer.handleRequest (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/layer.js:152:17)
+    at /Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:295:15
+    at processParams (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:582:12)
+    at next (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:186:3)
+[2025-10-21T14:33:44.023Z] ERROR: POST /auth/register - Missing required fields
+Error: Missing required fields
+    at registerController (/Users/clementg/Documents/cours-apib3-tp-gameShare/controllers/authController.js:7:13)
+    at Layer.handleRequest (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/layer.js:152:17)
+    at /Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:295:15
+    at processParams (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:582:12)
+    at next (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/index.js:186:3)
+[2025-10-21T14:37:16.608Z] ERROR: POST /auth/register - Erreur de validation
+Error: Erreur de validation
+    at validate (/Users/clementg/Documents/cours-apib3-tp-gameShare/middlewares/validationMiddleware.js:20:29)
+    at Layer.handleRequest (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/route.js:157:13)
+    at middleware (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/express-validator/lib/middlewares/check.js:16:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-10-21T14:47:21.600Z] ERROR: POST /auth/register - Erreur de validation
+Error: Erreur de validation
+    at validate (/Users/clementg/Documents/cours-apib3-tp-gameShare/middlewares/validationMiddleware.js:20:29)
+    at Layer.handleRequest (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/router/lib/route.js:157:13)
+    at middleware (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/express-validator/lib/middlewares/check.js:16:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-10-21T14:48:10.036Z] ERROR: POST /auth/register - Operation `users.findOne()` buffering timed out after 10000ms
+MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/mongoose/lib/drivers/node-mongodb-native/collection.js:187:23)
+    at listOnTimeout (node:internal/timers:573:17)
+    at process.processTimers (node:internal/timers:514:7)
+[2025-10-21T14:50:58.579Z] ERROR: Failed to connect to MongoDB - connect ECONNREFUSED 127.0.0.1:27017, connect ECONNREFUSED ::1:27017
+MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017, connect ECONNREFUSED ::1:27017
+    at _handleConnectionErrors (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/mongoose/lib/connection.js:1169:11)
+    at NativeConnection.openUri (/Users/clementg/Documents/cours-apib3-tp-gameShare/node_modules/mongoose/lib/connection.js:1100:11)
+    at runNextTicks (node:internal/process/task_queues:60:5)
+    at listOnTimeout (node:internal/timers:540:9)
+    at process.processTimers (node:internal/timers:514:7)
+[2025-10-21T14:59:40.739Z] ERROR: POST /auth/register - next is not defined
+ReferenceError: next is not defined
+    at registerController (/Users/clementg/Documents/cours-apib3-tp-gameShare/controllers/authController.js:12:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-10-21T15:00:21.204Z] ERROR: POST /auth/register - Utilisateur déjà existant
+Error: Utilisateur déjà existant
+    at registerController (/Users/clementg/Documents/cours-apib3-tp-gameShare/controllers/authController.js:12:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-10-21T15:00:22.828Z] ERROR: POST /auth/register - Utilisateur déjà existant
+Error: Utilisateur déjà existant
+    at registerController (/Users/clementg/Documents/cours-apib3-tp-gameShare/controllers/authController.js:12:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-10-21T15:00:23.769Z] ERROR: POST /auth/register - Utilisateur déjà existant
+Error: Utilisateur déjà existant
+    at registerController (/Users/clementg/Documents/cours-apib3-tp-gameShare/controllers/authController.js:12:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-10-21T15:00:24.141Z] ERROR: POST /auth/register - Utilisateur déjà existant
+Error: Utilisateur déjà existant
+    at registerController (/Users/clementg/Documents/cours-apib3-tp-gameShare/controllers/authController.js:12:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2025-10-21T15:00:24.405Z] ERROR: POST /auth/register - Utilisateur déjà existant
+Error: Utilisateur déjà existant
+    at registerController (/Users/clementg/Documents/cours-apib3-tp-gameShare/controllers/authController.js:12:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
