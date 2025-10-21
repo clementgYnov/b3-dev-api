@@ -52,7 +52,7 @@ const requiredRole = (requiredRole) => {
     };
 }; 
 
-const requestAnyRole = (allowedRoles) => {
+const requireAnyRole = (allowedRoles) => {
     return (req, res, next) => {
         if(!req.user) {
             return res.status(401).json({ message: "User not authenticated" });
@@ -68,11 +68,11 @@ const requestAnyRole = (allowedRoles) => {
 
 const requirePermission = (action) => {
     return (req, res, next) => {
-        if(!req.user) {
+        if(!req.user) { // req.user
             return res.status(401).json({ message: "User not authenticated" });
         }
 
-        if(!req.user.canPerform(action)) {
+        if(!req.user.canPerform(action)) { // canPerform
             return res.status(403).json({ message: "Insufficient permissions" });
         }
 
@@ -83,6 +83,7 @@ const requirePermission = (action) => {
 const optionalAuthenticate = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
+        console.log(authHeader)
         if (authHeader && authHeader.startsWith('Bearer ')) {
             const token = authHeader.split(' ')[1];
             const decoded = jwt.verify(token, JWT_SECRET);
@@ -102,7 +103,7 @@ module.exports = {
     generateToken,
     authenticateUser,
     requiredRole,
-    requestAnyRole,
+    requireAnyRole,
     requirePermission,
     optionalAuthenticate
 };
